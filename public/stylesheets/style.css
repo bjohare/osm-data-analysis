@@ -6,3 +6,5 @@ body {
 a {
   color: #00B7FF;
 }
+
+#map { height: 480px; width: 960px;}
