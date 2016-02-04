@@ -1,9 +1,12 @@
 var express = require('express');
 var pg = require('pg');
 var turf = require('turf');
+var tilereduce = require('tile-reduce');
+var path = require('path');
 var router = express.Router();
 
 var connStr = "postgres://gis:@/osm_data_analysis";
+
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -17,6 +20,8 @@ router.get('/map', function(req, res) {
         title: 'OSM Data Analysis Prototype',
     });
 });
+
+
 
 router.get('/townlands.json', function(req, res) {
     var client = new pg.Client(connStr);
@@ -49,5 +54,42 @@ router.get('/townlands.json', function(req, res) {
     });
 });
 
+
+router.get('/count.json', function(req, res) {
+    var count = 0;
+    var tiles = 0;
+    var mapPath = path.join(__dirname, 'buildings.js');
+    var features = [];
+    tilereduce({
+            // kathmandu
+            bbox: [85.687866, 27.438822, 85.042419, 27.939820], // w,s,e,n
+            zoom: 12,
+            map: __dirname + '/buildings.js',
+            maxWorkers: 4,
+            sources: [{
+                name: 'osm',
+                mbtiles: path.join(__dirname, '../data/nepal.mbtiles'),
+                raw: false
+            }]
+        })
+        .on('reduce', function(result, tile) {
+            features.push(result);
+            count += result.length;
+            tiles += 1;
+        })
+        .on('end', function() {
+            var feats = {
+                "type": "FeatureCollection",
+                "features": features
+            }
+            console.log('Features total: %d', count);
+            res.type('application/json');
+            res.send({
+                'tiles_processed': tiles,
+                'total_buildings': count,
+            });
+        });
+
+});
 
 module.exports = router;

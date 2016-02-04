@@ -4,11 +4,26 @@
 
 {% block content %}
 
-  <div class="container">
-
-    <h1>{{ title }}</h1>
-    <p>Welcome to {{ title }}</p>
-
-  </div>
+<div class="row">
+    <div class="col-md-6"><div id="map"></div></div>
+    <div class="col-md-6 wizard">
+        <div>
+            <h4>Pan and Zoom the map to find your Area of Interest (AOI).</h4>
+            <div>
+                <strong>Map extent:</strong> <span id="bounds"></span><br/>
+                <strong>Zoom Level:</strong> <span id="zoom"></span>
+                <form id="countForm">
+                    <div class="form-group">
+                        <label for="feature">Select features to count:</label>
+                        <input type="text" class="form-control" id="feature" placeholder="OSM Tag" name="feature">
+                    </div>
+                    <button id="count" type="submit" class="btn btn-lg btn-primary">Count Features</button>
+                </form>
+            </div>
+        </div>
+        <div>Results</div>
+        <div>Found <span id="count"></span> features.</div>
+    </div>
+</div>
 
 {% endblock %}

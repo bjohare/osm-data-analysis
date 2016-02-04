@@ -5,10 +5,13 @@
 {% block content %}
 
   <div class="container-fluid">
-
-    <h1>{{ title }}</h1>
-    <p>Welcome to {{ title }}</p>
-    <div id="map"></div>
+  <div class="row">
+        <div class="col-md-6 map"><div id="map"></div></div>
+        <div class="col-md-6"><h1>{{ title }}</h1></div>
+        <div>
+            <h2>Pan and Zoom the map to find your Area of Interest (AOI).</h2>
+        </div>
+   </div>
   </div>
 
 {% endblock %}
