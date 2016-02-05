@@ -1,2 +1,2 @@
-# osm-data-analysis
-OSM Data Analysis Prototype
+# OSM Data Analysis Tool 
+OSM Data Analysis Prototype demonstrator
