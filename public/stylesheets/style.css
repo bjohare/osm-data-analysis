@@ -12,14 +12,30 @@ html, body {
 #map{
     width: auto;
     height: 600px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
 }
 
 .wizard {
-    padding-left:15px !important;
+    padding-left: 15px !important;
+    padding-right: 15px !important;
 }
 
 .container-fluid {
     padding-left: 0px !important;
+}
+
+#results {
+    display: none;
+    margin-top: 2em;
+}
+
+#_id {
+    display: none;
+}
+
+#analysis {
+    font-size: large;
+    margin-top: 2em;
 }
 
 /* HOT Export Tool */
@@ -695,10 +711,6 @@ table#jobs td.owner {
 
 table#configurations {
     margin-top: .5em;
-}
-
-#results {
-    border-top: 2px solid lightgrey;
 }
 
 form#search {

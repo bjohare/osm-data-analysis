@@ -3,9 +3,16 @@ var pg = require('pg');
 var turf = require('turf');
 var tilereduce = require('tile-reduce');
 var path = require('path');
+var uuid = require('uuid');
+var Readable = require('stream').Readable;
 var router = express.Router();
 
 var connStr = "postgres://gis:@/osm_data_analysis";
+
+var results = {
+    "count": 0,
+    "tiles": 0
+}
 
 
 /* GET home page. */
@@ -22,48 +29,28 @@ router.get('/map', function(req, res) {
 });
 
 
-
-router.get('/townlands.json', function(req, res) {
-    var client = new pg.Client(connStr);
-    client.connect();
-    var query = client.query("SELECT id, name, ST_AsGeoJSON(ST_Transform(the_geom, 4326)) as geometry FROM cloughjordan_townlands");
-    var features = {
-        "type": "FeatureCollection",
-        "features": []
-    }
-    query.on("row", function(row, result) {
-        var feat = {
-            "type": "Feature",
-            "properties": {},
-            "geometry": {}
-        }
-        var geom = row.geometry;
-        feat.geometry = JSON.parse(geom);
-        var properties = {};
-        properties.id = row.id;
-        properties.name = row.name;
-        properties.area = turf.area(feat.geometry);
-        feat.properties = properties;
-        result.addRow(feat);
-    });
-
-    query.on("end", function(result) {
-        features.features = result.rows;
-        res.type('application/json');
-        res.send(features);
-    });
-});
-
-
 router.get('/count.json', function(req, res) {
     var count = 0;
     var tiles = 0;
     var mapPath = path.join(__dirname, 'buildings.js');
     var features = [];
+
+    // query_id
+    var quid = uuid.v4();
+
+    var bbox = req.query.bbox.split(' ');
+    var zoom = req.query.zoom;
+    var tag = req.query.feature;
+
+    var mapOpts = {
+        "tag": tag
+    }
+
     tilereduce({
             // kathmandu
-            bbox: [85.687866, 27.438822, 85.042419, 27.939820], // w,s,e,n
-            zoom: 12,
+            bbox: bbox,
+            zoom: zoom,
+            mapOptions: mapOpts,
             map: __dirname + '/buildings.js',
             maxWorkers: 4,
             sources: [{
@@ -72,24 +59,36 @@ router.get('/count.json', function(req, res) {
                 raw: false
             }]
         })
+        .on('start', function(result, tile) {
+            // stream data to the client
+            res.setHeader("content-type", "application/json");
+            res.write('{"type": "FeatureCollection", "features": [' + '\n');
+        })
         .on('reduce', function(result, tile) {
-            features.push(result);
             count += result.length;
             tiles += 1;
+            results.count = count;
+            results.tiles = tiles;
+            result.forEach(function(feature){
+                res.write(JSON.stringify(feature) + ',');
+            });
         })
         .on('end', function() {
-            var feats = {
-                "type": "FeatureCollection",
-                "features": features
-            }
+            res.write(']}' + '\n');
+            res.end();
             console.log('Features total: %d', count);
-            res.type('application/json');
-            res.send({
-                'tiles_processed': tiles,
-                'total_buildings': count,
-            });
+            // store results
         });
 
+});
+
+router.get('/query.json', function(req, res) {
+    res.type('application/json');
+    res.send({
+        "status": "OK",
+        "count": results.count,
+        "tiles": results.tiles
+    })
 });
 
 module.exports = router;

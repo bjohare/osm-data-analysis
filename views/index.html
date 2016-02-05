@@ -15,14 +15,15 @@
                 <form id="countForm">
                     <div class="form-group">
                         <label for="feature">Select features to count:</label>
-                        <input type="text" class="form-control" id="feature" placeholder="OSM Tag" name="feature">
+                        <input type="text" class="form-control" id="feature" placeholder="OSM Tag, e.g., aeroway" name="feature">
                     </div>
                     <button id="count" type="submit" class="btn btn-lg btn-primary">Count Features</button>
                 </form>
             </div>
         </div>
-        <div>Results</div>
-        <div>Found <span id="count"></span> features.</div>
+        <span id="_id"></span>
+        <div id="results" class="alert alert-success" role="alert"></div>
+        <div id="analysis"></div>
     </div>
 </div>
 
