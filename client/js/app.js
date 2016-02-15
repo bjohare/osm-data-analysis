@@ -57,7 +57,7 @@ var app = (function() {
 
         map.on('moveend', function() {
             var ll = map.getBounds();
-            $('#bounds').html(vsprintf('%s %s %s %s', [ll.getWest().toFixed(5), ll.getSouth().toFixed(5), ll.getEast().toFixed(5), ll.getNorth().toFixed(5)]));
+            $('#bounds').html(vsprintf('%s %s %s %s', [ll.getWest().toFixed(7), ll.getSouth().toFixed(7), ll.getEast().toFixed(7), ll.getNorth().toFixed(7)]));
             $('#zoom').html(map.getZoom());
         })
     }
@@ -65,23 +65,38 @@ var app = (function() {
     function initForm() {
         $('#countForm').on('submit', function(e) {
             e.preventDefault(); // prevent native submit
+            analysis_features.clearLayers();
             $('button#count').prop('disabled', true);
             var zoom = $('#zoom').html();
             var bbox = $('#bounds').html();
             var feature = $('input#feature').val();
             var url = '/count.json?zoom=' + zoom + '&bbox=' + bbox + '&feature=' + feature;
+            var featureCount = 0;
             leafletStream.ajax(url, analysis_features)
-                .on('data', function(data) {})
+                .on('data', function(data) {
+                    if (data.geometry.type == 'Point' || data.geometry.type == 'MultiPoint'){
+                        console.log(data);
+                    }
+                    else{
+                        featureCount += 1;
+                        $('#analysis').empty();
+                        $('#analysis').html('Found ' + featureCount + ' features');
+                    }
+                })
                 .on('end', function() {
                     $('button#count').prop('disabled', false);
+                    if(featureCount == 0){
+                        $('#analysis').html('No features found');
+                    }
                 });
-
+            /*
             var intId = window.setInterval(function() {
                 $.getJSON('/query.json', function(json, textStatus) {
                     $('#analysis').empty();
                     $('#analysis').html('Proccessed: ' + json.tiles + ' tiles. Found: ' + json.count + ' features.');
                 });
             }, 5000);
+            */
 
         });
     }

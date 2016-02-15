@@ -4,10 +4,7 @@ var turf = require('turf');
 var tilereduce = require('tile-reduce');
 var path = require('path');
 var uuid = require('uuid');
-var Readable = require('stream').Readable;
 var router = express.Router();
-
-var connStr = "postgres://gis:@/osm_data_analysis";
 
 var results = {
     "count": 0,
